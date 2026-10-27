@@ -5,7 +5,7 @@ services:
       POSTGRES_USER: sakhi
       POSTGRES_PASSWORD: sakhi_dev_only
       POSTGRES_DB: sakhi
-    ports: ["5432:5432"]
+    ports: ["5433:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sakhi"]
