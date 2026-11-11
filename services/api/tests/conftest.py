@@ -5,6 +5,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 
 import pytest
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
@@ -12,6 +13,7 @@ TEST_DATABASE_URL = os.environ.get(
     "TEST_DATABASE_URL",
     "postgresql+asyncpg://sakhi:sakhi_dev_only@localhost:5433/sakhi_test",
 )
+TEST_REDIS_URL = os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/15")
 # Must be set before any app module reads settings.
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
@@ -35,3 +37,12 @@ async def session() -> AsyncIterator[AsyncSession]:
             yield s
         await trans.rollback()
     await engine.dispose()
+
+
+@pytest.fixture
+async def redis_client() -> AsyncIterator[Redis]:
+    client = Redis.from_url(TEST_REDIS_URL, decode_responses=True)
+    await client.flushdb()
+    yield client
+    await client.flushdb()
+    await client.aclose()
